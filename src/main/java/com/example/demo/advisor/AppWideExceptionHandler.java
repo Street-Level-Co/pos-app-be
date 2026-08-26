@@ -2,22 +2,14 @@ package com.example.demo.advisor;
 
 import com.example.demo.exception.EntryAlreadyExistsException;
 import com.example.demo.exception.EntryNotFoundException;
+import com.example.demo.exception.LoginFailedException;
+import com.example.demo.exception.TokenRefreshException;
 import com.example.demo.util.StandardResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
-import java.io.StreamCorruptedException;
-import java.nio.file.AccessDeniedException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
 
 /**
  * @author : Manoj Vitharana <mvitharana@onepeterson.com>
@@ -42,5 +34,21 @@ public class AppWideExceptionHandler {
         return new ResponseEntity<>(
                 new StandardResponse("Provided data already registered. Please Check inputs", e.getMessage()),
                 HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({LoginFailedException.class})
+    public ResponseEntity<StandardResponse> loginFailedHandler(LoginFailedException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(
+                new StandardResponse(e.getMessage(), null),
+                HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler({TokenRefreshException.class})
+    public ResponseEntity<StandardResponse> tokenRefreshFailedHandler(TokenRefreshException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(
+                new StandardResponse(e.getMessage(), null),
+                HttpStatus.UNAUTHORIZED);
     }
 }
