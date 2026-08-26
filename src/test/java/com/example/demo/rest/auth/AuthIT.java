@@ -35,7 +35,7 @@ public class AuthIT extends ITBase {
 
     @Override
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         super.setup();
     }
 
