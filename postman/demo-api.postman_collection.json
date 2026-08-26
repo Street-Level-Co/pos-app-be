@@ -1,0 +1,438 @@
+{
+  "info": {
+    "_postman_id": "b7e2f3a0-1d4e-4c9a-9b3a-1e8f6d2c5a11",
+    "name": "Demo API",
+    "description": "Login -> stores accessToken/refreshToken as collection variables. All other requests inherit the Bearer token automatically. Use 'Refresh Token' to rotate tokens when the access token expires.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "username", "value": "demo.user", "type": "string" },
+    { "key": "password", "value": "P@ssw0rd123", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "clientId", "value": "", "type": "string" },
+    { "key": "organizationId", "value": "", "type": "string" },
+    { "key": "countryId", "value": "", "type": "string" },
+    { "key": "catalogItemId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Creates a new user. Run once per username; returns 409-style app error if the username already exists."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login succeeded', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    const data = body.data || {};",
+                  "    pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "    console.log('Stored accessToken/refreshToken from login response.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticates and stores the returned accessToken/refreshToken into collection variables for use by every other request in this collection."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Refresh succeeded', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    const data = body.data || {};",
+                  "    pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "    console.log('Rotated accessToken/refreshToken from refresh response.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            },
+            "description": "Exchanges the current refresh token for a new access + refresh token pair. The server revokes the old refresh token (rotation), so the stored value is replaced on every call."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('accessToken', '');",
+                  "    pm.collectionVariables.set('refreshToken', '');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Revokes the refresh token server-side and clears the stored tokens locally."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Country",
+      "item": [
+        {
+          "name": "Get All Countries",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json().data;",
+                  "    if (Array.isArray(data) && data.length > 0 && data[0].id) {",
+                  "        pm.collectionVariables.set('countryId', data[0].id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/country",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "country"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Country By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/country/{{countryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "country", "{{countryId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Client",
+      "item": [
+        {
+          "name": "Register Client",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json().data;",
+                  "    if (data && data.id) {",
+                  "        pm.collectionVariables.set('clientId', data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"mobile\": 771234567\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/client/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "client", "register"]
+            },
+            "description": "Stores the created client's id into {{clientId}} for use by the Organization requests."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Client By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/client/{{clientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "client", "{{clientId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Organization",
+      "item": [
+        {
+          "name": "Register Organization",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json().data;",
+                  "    if (data && data.id) {",
+                  "        pm.collectionVariables.set('organizationId', data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientID\": \"{{clientId}}\",\n  \"name\": \"Acme Retail\",\n  \"address\": \"123 Main St\",\n  \"contact\": 771234567,\n  \"brNumber\": \"BR-0001\",\n  \"country\": \"{{countryId}}\",\n  \"additionalData\": {},\n  \"additionalValues\": {}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/organization/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "organization", "register"]
+            },
+            "description": "Requires {{clientId}} (from Register Client) and {{countryId}} (from Get All Countries) to already be set. Stores the created organization's id into {{organizationId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Organization By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/organization/{{organizationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "organization", "{{organizationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add User To Organization",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientID\": \"{{clientId}}\",\n  \"orgID\": \"{{organizationId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/organization/add-user",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "organization", "add-user"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "Register Catalog Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json().data;",
+                  "    if (data && data.id) {",
+                  "        pm.collectionVariables.set('catalogItemId', data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemID\": null,\n  \"itemName\": \"Sample Item\",\n  \"orgID\": \"{{organizationId}}\",\n  \"price\": 19.99,\n  \"disPrice\": 14.99,\n  \"imgUrl\": \"https://example.com/item.png\",\n  \"description\": \"Sample catalog item\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "catalog", "register"]
+            },
+            "description": "Requires {{organizationId}} to already be set. Stores the created catalog item's id into {{catalogItemId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Catalog Items By Organization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/all/{{organizationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "catalog", "all", "{{organizationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Catalog Item By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/{{catalogItemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "catalog", "{{catalogItemId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sales",
+      "item": [
+        {
+          "name": "Register Sale",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientID\": \"{{clientId}}\",\n  \"orgID\": \"{{organizationId}}\",\n  \"customerID\": null,\n  \"customerContact\": 771234567,\n  \"items\": [\n    {\n      \"catalogItemID\": \"{{catalogItemId}}\",\n      \"qty\": 1,\n      \"price\": 19.99,\n      \"discountPrice\": 14.99\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sales/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sales", "register"]
+            },
+            "description": "NOTE: SalesController.registerSale() currently takes no @RequestBody, so this payload is sent but ignored by the server until that endpoint is wired up to accept CreateSale."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
