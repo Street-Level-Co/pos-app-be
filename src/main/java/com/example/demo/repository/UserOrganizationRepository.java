@@ -1,0 +1,16 @@
+package com.example.demo.repository;
+
+import com.example.demo.model.UserOrganization;
+import com.example.demo.model.UserOrganizationId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.UUID;
+
+@Repository
+public interface UserOrganizationRepository extends JpaRepository<UserOrganization, UserOrganizationId> {
+    List<UserOrganization> findAllByUser_Id(UUID userId);
+
+    List<UserOrganization> findAllByOrg_Id(UUID orgId);
+}
