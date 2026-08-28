@@ -1,10 +1,11 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.EntryNotFoundException;
 import com.example.demo.model.Item;
 import com.example.demo.repository.ItemRepository;
 import com.example.demo.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,18 +16,6 @@ import java.util.UUID;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-
-    @Override
-    public Item findByItemName(String itemName) {
-        return this.findByName(itemName)
-                .orElseThrow(() -> new EntryNotFoundException(itemName + " not found"));
-    }
-
-    @Override
-    public Item findById(UUID id) {
-        return this.findByID(id)
-                .orElseThrow(() -> new EntryNotFoundException("Item not found"));
-    }
 
     @Override
     public Optional<Item> findByName(String name) {
@@ -41,5 +30,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item createItem(Item item) {
         return itemRepository.save(item);
+    }
+
+    @Override
+    public Page<Item> findAll(String keyword, PageRequest of) {
+        return itemRepository.findAllByItemNameContainsIgnoreCase(keyword, of);
     }
 }

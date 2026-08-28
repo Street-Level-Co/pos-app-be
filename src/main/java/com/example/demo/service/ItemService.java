@@ -1,14 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Item;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public interface ItemService {
-    Item findByItemName(String itemName);
-
-    Item findById(UUID id);
 
     Optional<Item> findByName(String name);
 
@@ -16,4 +15,5 @@ public interface ItemService {
 
     Item createItem(Item item);
 
+    Page<Item> findAll(String keyword, PageRequest of);
 }
