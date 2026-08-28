@@ -4,8 +4,10 @@ import com.example.demo.exception.EntryNotFoundException;
 import com.example.demo.model.Client;
 import com.example.demo.model.ClientOrganization;
 import com.example.demo.model.Organization;
+import com.example.demo.model.UserOrganization;
 import com.example.demo.repository.ClientOrganizationRepository;
 import com.example.demo.repository.OrganizationRepository;
+import com.example.demo.repository.UserOrganizationRepository;
 import com.example.demo.service.ClientService;
 import com.example.demo.service.CountryService;
 import com.example.demo.service.OrganizationService;
@@ -30,6 +32,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final CountryService countryService;
 
     private final ClientService clientService;
+
+    private final UserOrganizationRepository userOrganizationRepository;
 
     @Override
     public Organization createOrganization(CreateOrganization input) {
@@ -71,5 +75,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 client.getId(),
                 organization.getId()
         ));
+    }
+
+    @Override
+    public List<UserOrganization> getOrganizationsByUser(UUID userId) {
+        return userOrganizationRepository.findAllByUser_Id(userId);
+    }
+
+    @Override
+    public List<UserOrganization> getUsersByOrganization(UUID organizationId) {
+        return userOrganizationRepository.findAllByOrg_Id(organizationId);
     }
 }

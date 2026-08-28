@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 import com.example.demo.service.OrganizationService;
-import com.example.demo.transfer.create.CreateClient;
 import com.example.demo.transfer.create.CreateOrganization;
 import com.example.demo.transfer.update.AddUser;
 import com.example.demo.util.StandardResponse;
@@ -44,6 +43,22 @@ public class OrganizationController {
     public ResponseEntity<StandardResponse> addUser(@RequestBody @Valid AddUser input) {
         return new ResponseEntity<>(
                 new StandardResponse("Success", organizationService.addUser(input)),
+                HttpStatus.CREATED
+        );
+    }
+
+    @GetMapping("organizations-by-user/{userId}")
+    public ResponseEntity<StandardResponse> getOrganizationsByUser(@PathVariable UUID userId) {
+        return new ResponseEntity<>(
+                new StandardResponse("Success", organizationService.getOrganizationsByUser(userId)),
+                HttpStatus.CREATED
+        );
+    }
+
+    @GetMapping("users-by-organization/{organizationId}")
+    public ResponseEntity<StandardResponse> getUsersByOrganization(@PathVariable UUID organizationId) {
+        return new ResponseEntity<>(
+                new StandardResponse("Success", organizationService.getUsersByOrganization(organizationId)),
                 HttpStatus.CREATED
         );
     }
