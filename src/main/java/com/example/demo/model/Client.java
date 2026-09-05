@@ -27,7 +27,7 @@ public class Client {
     @Column(name = "client_id", nullable = false)
     private UUID id;
 
-    @Column(name = "username", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "username", length = Integer.MAX_VALUE)
     private String username;
 
     @Column(name = "mobile", nullable = false)
@@ -35,6 +35,11 @@ public class Client {
 
     public Client(String username, Long mobile) {
         this.username = username;
+        this.mobile = mobile;
+    }
+
+    /** Walk-in customer captured by mobile number only (e.g. at checkout), no name on file yet. */
+    public Client(Long mobile) {
         this.mobile = mobile;
     }
 }

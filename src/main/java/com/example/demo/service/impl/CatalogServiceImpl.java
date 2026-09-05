@@ -6,14 +6,16 @@ import com.example.demo.model.CatalogItem;
 import com.example.demo.model.Item;
 import com.example.demo.model.Organization;
 import com.example.demo.repository.CatalogRepository;
-import com.example.demo.repository.ItemRepository;
 import com.example.demo.service.CatalogService;
 import com.example.demo.service.ItemService;
 import com.example.demo.service.OrganizationService;
+import com.example.demo.transfer.CatalogItemSummary;
 import com.example.demo.transfer.CreateCatalogItem;
+import com.example.demo.transfer.update.UpdateCatalogItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +32,7 @@ public class CatalogServiceImpl implements CatalogService {
     private final OrganizationService organizationService;
 
     @Override
-    public CatalogItem createCatalogItem(CreateCatalogItem catalogItem) {
+    public CatalogItemSummary createCatalogItem(CreateCatalogItem catalogItem) {
         Item item;
         if (catalogItem.getItemID() == null) {
             item = itemService.findByName(catalogItem.getItemName().trim())
@@ -47,7 +49,7 @@ public class CatalogServiceImpl implements CatalogService {
             throw new EntryAlreadyExistsException("Item already exists");
         }
         Organization org = organizationService.getOrganization(catalogItem.getOrgID());
-        return catalogRepository.save(new CatalogItem(
+        CatalogItem saved = catalogRepository.save(new CatalogItem(
                 item,
                 org,
                 catalogItem.getPrice(),
@@ -55,16 +57,49 @@ public class CatalogServiceImpl implements CatalogService {
                 catalogItem.getImgUrl(),
                 catalogItem.getDescription()
         ));
+        return toSummary(saved);
     }
 
     @Override
-    public List<CatalogItem> getAllCatalogItems(UUID orgID) {
-        return catalogRepository.findAllByOrg_Id(orgID);
+    @Transactional(readOnly = true)
+    public List<CatalogItemSummary> getAllCatalogItems(UUID orgID) {
+        log.info("getting organization for : {} ", orgID);
+        return catalogRepository.findAllByOrg_Id(orgID).stream()
+                .map(this::toSummary)
+                .toList();
     }
 
     @Override
-    public CatalogItem getCatalogItem(UUID catalogItemID) {
+    @Transactional(readOnly = true)
+    public CatalogItemSummary getCatalogItem(UUID catalogItemID) {
         return catalogRepository.findById(catalogItemID)
+                .map(this::toSummary)
                 .orElseThrow(() -> new EntryNotFoundException("Catalog Item Not Found"));
+    }
+
+    @Override
+    public CatalogItemSummary updateCatalogItem(UUID catalogItemID, UpdateCatalogItem input) {
+        CatalogItem catalogItem = catalogRepository.findById(catalogItemID)
+                .orElseThrow(() -> new EntryNotFoundException("Catalog Item Not Found"));
+
+        if (input.getPrice() != null) catalogItem.setPrice(input.getPrice());
+        if (input.getDisPrice() != null) catalogItem.setDiscountedPrice(input.getDisPrice());
+        if (input.getImgUrl() != null) catalogItem.setImgUrl(input.getImgUrl());
+        if (input.getDescription() != null) catalogItem.setDescription(input.getDescription());
+
+        return toSummary(catalogRepository.save(catalogItem));
+    }
+
+    private CatalogItemSummary toSummary(CatalogItem catalogItem) {
+        return new CatalogItemSummary(
+                catalogItem.getId(),
+                catalogItem.getItem().getId(),
+                catalogItem.getItem().getItemName(),
+                catalogItem.getOrg().getId(),
+                catalogItem.getPrice(),
+                catalogItem.getDiscountedPrice(),
+                catalogItem.getImgUrl(),
+                catalogItem.getDescription()
+        );
     }
 }

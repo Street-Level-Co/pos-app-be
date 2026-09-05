@@ -15,4 +15,6 @@ public interface ClientRepository extends JpaRepository<Client, UUID> , JpaSpeci
     boolean existsClientByMobile(Long mobile);
 
     Optional<Client> findClientByUsername(String username);
+
+    Optional<Client> findClientByMobile(Long mobile);
 }

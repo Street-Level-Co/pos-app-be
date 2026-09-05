@@ -5,12 +5,14 @@ import com.example.demo.exception.LoginFailedException;
 import com.example.demo.exception.TokenRefreshException;
 import com.example.demo.model.RefreshToken;
 import com.example.demo.model.User;
+import com.example.demo.repository.UserOrganizationRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtService;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.RefreshTokenService;
 import com.example.demo.transfer.auth.AuthResponse;
 import com.example.demo.transfer.auth.LoginRequest;
+import com.example.demo.transfer.auth.OrganizationSummary;
 import com.example.demo.transfer.auth.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +22,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -27,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private static final String DEFAULT_ROLE = "USER";
 
     private final UserRepository userRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -74,6 +79,10 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponse issueTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = refreshTokenService.issue(user.getId());
-        return new AuthResponse(accessToken, newRefreshToken, "Bearer", jwtService.getAccessTokenExpirationMs());
+        List<OrganizationSummary> organizations = userOrganizationRepository.findOrganizationsByUserId(user.getId())
+                .stream()
+                .map(org -> new OrganizationSummary(org.getId(), org.getOrgName()))
+                .toList();
+        return new AuthResponse(accessToken, newRefreshToken, "Bearer", jwtService.getAccessTokenExpirationMs(), user.getId(), organizations);
     }
 }
