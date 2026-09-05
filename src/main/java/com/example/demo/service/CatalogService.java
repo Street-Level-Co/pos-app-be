@@ -16,4 +16,6 @@ public interface CatalogService {
     CatalogItemSummary getCatalogItem(UUID catalogItemID);
 
     CatalogItemSummary updateCatalogItem(UUID catalogItemID, UpdateCatalogItem input);
+
+    long countCatalogItems(UUID orgID);
 }

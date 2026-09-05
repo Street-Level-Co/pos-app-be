@@ -90,6 +90,12 @@ public class CatalogServiceImpl implements CatalogService {
         return toSummary(catalogRepository.save(catalogItem));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public long countCatalogItems(UUID orgID) {
+        return catalogRepository.countByOrg_Id(orgID);
+    }
+
     private CatalogItemSummary toSummary(CatalogItem catalogItem) {
         return new CatalogItemSummary(
                 catalogItem.getId(),

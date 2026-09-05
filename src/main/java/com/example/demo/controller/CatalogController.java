@@ -40,6 +40,14 @@ public class CatalogController {
                 HttpStatus.OK
         );    }
 
+    @GetMapping("count/{orgID}")
+    public ResponseEntity<StandardResponse> countCatalogItems(@PathVariable UUID orgID) {
+        return new ResponseEntity<>(
+                new StandardResponse("Success", catalogService.countCatalogItems(orgID)),
+                HttpStatus.OK
+        );
+    }
+
     @GetMapping("{catalogItemID}")
     public ResponseEntity<StandardResponse> getCatalogItem(@PathVariable UUID catalogItemID) {
         return new ResponseEntity<>(

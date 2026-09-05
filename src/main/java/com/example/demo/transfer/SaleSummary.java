@@ -1,5 +1,6 @@
 package com.example.demo.transfer;
 
+import com.example.demo.model.DiscountType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,10 @@ public class SaleSummary {
     private UUID id;
     private UUID orgID;
     private UUID clientID;
+    private Long customerMobile;
+    private BigDecimal subtotal;
+    private DiscountType discountType;
+    private BigDecimal discountValue;
     private BigDecimal totalAmount;
     private Instant createdAt;
     private List<SaleItemSummary> items;

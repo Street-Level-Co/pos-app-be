@@ -5,7 +5,6 @@ import com.example.demo.model.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.xml.catalog.Catalog;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,4 +13,6 @@ public interface CatalogRepository extends JpaRepository<CatalogItem, UUID> {
     boolean existsByItem(Item item);
 
     List<CatalogItem> findAllByOrg_Id(UUID orgID);
+
+    long countByOrg_Id(UUID orgID);
 }
